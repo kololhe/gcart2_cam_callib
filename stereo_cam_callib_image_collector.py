@@ -113,7 +113,7 @@ def configure_trigger(cam):
     return result
 
 
-def grab_next_image_by_trigger(nodemap, cam):
+def grab_next_image_by_trigger(cam_list):
     """
     This function acquires an image by executing the trigger node.
 
@@ -136,14 +136,15 @@ def grab_next_image_by_trigger(nodemap, cam):
         if CHOSEN_TRIGGER == TriggerType.SOFTWARE:
             # Get user input
             input('Press the Enter key to initiate software trigger.')
+            PySpin.CCommandPtr(cam_list.GetBySerial('17528370').GetNodeMap().GetNode('TriggerSoftware')).Execute()
+            PySpin.CCommandPtr(cam_list.GetBySerial('18060270').GetNodeMap().GetNode('TriggerSoftware')).Execute()
+            # # Execute software trigger
+            # node_softwaretrigger_cmd = PySpin.CCommandPtr(nodemap.GetNode('TriggerSoftware'))
+            # if not PySpin.IsWritable(node_softwaretrigger_cmd):
+            #     print('Unable to execute trigger. Aborting...')
+            #     return False
 
-            # Execute software trigger
-            node_softwaretrigger_cmd = PySpin.CCommandPtr(nodemap.GetNode('TriggerSoftware'))
-            if not PySpin.IsWritable(node_softwaretrigger_cmd):
-                print('Unable to execute trigger. Aborting...')
-                return False
-
-            node_softwaretrigger_cmd.Execute()
+            # node_softwaretrigger_cmd.Execute()
 
             # TODO: Blackfly and Flea3 GEV cameras need 2 second delay after software trigger
 
@@ -206,6 +207,7 @@ def acquire_images(cam_list):
             print('Camera %d started acquiring images...' % i)
 
             print()
+        
 
         # Retrieve, convert, and save images for each camera
         #
@@ -224,6 +226,7 @@ def acquire_images(cam_list):
         # By default, if no specific color processing algorithm is set, the image
         # processor will default to NEAREST_NEIGHBOR method.
         processor.SetColorProcessing(PySpin.SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR)
+        grab_next_image_by_trigger(cam_list)
 
         for n in range(NUM_IMAGES):
             for i, cam in enumerate(cam_list):
